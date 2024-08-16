@@ -28,6 +28,6 @@ public class GameController : MonoBehaviour
     }
     public void ExitGame()
     {
-        APIController.CloseWindow();
+        //APIController.CloseWindow();
     }
 }

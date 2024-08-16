@@ -39,7 +39,7 @@ public class DiceRotationHandler : MonoBehaviour
         Dice2.localRotation = dice2Rot;
         int dice1Face = 0;
         int dice2Face = 0;
-        if (!APIController.instance.userDetails.isBlockApiConnection)
+        /*if (!APIController.instance.userDetails.isBlockApiConnection)
         {
             if (DiceRolla.DiceRoll.winProbability > 0)
             {
@@ -138,7 +138,7 @@ public class DiceRotationHandler : MonoBehaviour
                             break;
                         }
                     }
-                    /*                    switch (dice1Face)
+                    *//*                    switch (dice1Face)
                                         {
                                             case 0:
                                                 dice2Face = 5;//dice 1 = 1
@@ -155,7 +155,7 @@ public class DiceRotationHandler : MonoBehaviour
                                             case 4:
                                                 dice2Face = 1;// dice 1 = 5
                                                 break;
-                                        }*/
+                                        }*//*
                 }
                 else if (TwoOnSix && !EightOnTwelve)
                 {
@@ -209,13 +209,10 @@ public class DiceRotationHandler : MonoBehaviour
                     }
                 }
             }
-        }
-        else
-        {
-            Debug.Log("Demo Dice Result Outcome");
-            dice1Face = Random.Range(0, DiceResultRotations.Count);
-            dice2Face = Random.Range(0, DiceResultRotations.Count);
-        }
+        }*/
+        Debug.Log("Demo Dice Result Outcome");
+        dice1Face = Random.Range(0, DiceResultRotations.Count);
+        dice2Face = Random.Range(0, DiceResultRotations.Count);
         Vector3 dice1Result = DiceResultRotations[dice1Face];
         dice1Result.y = Random.Range(0, 360);
         Dice1.parent.position = Dice1StartPos;

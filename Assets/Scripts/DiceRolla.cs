@@ -31,7 +31,6 @@ public class DiceRolla : MonoBehaviour
     [SerializeField] DiceRotationHandler DicesHandler;
     [SerializeField] GameObject DiceContainer;
     [SerializeField] AlertPanelHandler ServerPopup;
-    TransactionMetaData Player = new();
     public int MultiplayerIndex;
     [SerializeField] TMP_Text DemoIndicator;
     public int GameCount = 0;
@@ -62,9 +61,6 @@ public class DiceRolla : MonoBehaviour
 
     private void Start()
     {
-        APIController.instance.OnUserBalanceUpdate += UpdateBalanceInUI;
-        APIController.instance.OnUserDetailsUpdate += UpdateUserDetailsInUI;
-        APIController.instance.OnSwitchingTab += OnTabSwitch;
         foreach (Rigidbody dice in Dice3D) InitialDicePos.Add(dice.transform.position);
         PoolContainer.PoolInstance.CreateContainer();
         MultiplayerIndex = 0;
@@ -73,7 +69,7 @@ public class DiceRolla : MonoBehaviour
         ParentAudioSource.transform.GetChild(5).GetComponent<AudioSource>().volume = 0.0f;
     }
 
-    public void OnTabSwitch(bool OnCurrentTab) //Get rid of it
+    /*public void OnTabSwitch(bool OnCurrentTab) //Get rid of it
     {
         if (OnCurrentTab)
         {
@@ -93,38 +89,28 @@ public class DiceRolla : MonoBehaviour
             AudioListener.volume = 0;
             DiceRolla.DiceRoll.ParentAudioSource.transform.GetChild(5).GetComponent<AudioSource>().volume = 0.0f;
         }
+    }*/
+
+    private void Update()
+    {
+        UpdateUserDetailsInUI();
+        UpdateBalanceInUI();
     }
 
     public void UpdateUserDetailsInUI() //Replace with a non api reliant method
     {
-        Username.text = $"{APIController.instance.userDetails.name}";
-        if (APIController.instance.userDetails.isBlockApiConnection) DemoIndicator.text = "7up 7down\r\n<size=35><alpha=#80>DEMO";
-        else DemoIndicator.text = "7up 7down";
+        Username.text = $"Default";
+        /*if (APIController.instance.userDetails.isBlockApiConnection)*/ DemoIndicator.text = "7up 7down\r\n<size=35><alpha=#80>DEMO";
+        /*else*/ DemoIndicator.text = "7up 7down";
     }
 
     public void UpdateBalanceInUI() //Replace with a non api reliant method
     {
-        BalanceDisplay.text = $"{APIController.instance.userDetails.balance.ToString("f2")} <size=40>{APIController.instance.userDetails.currency_type}";
-        BetsManager.Bets.Degenerate.Balance = (int)APIController.instance.userDetails.balance;
-    }
-
-    public void CallCreateMatch() //Get rid of it
-    {
-        APIController.instance.CreateMatch("limbo", (response) =>
-        {
-            Debug.Log($"CreateMatch" +
-                $"{JsonUtility.ToJson(response)}");
-            Debug.Log("MatchTokenID: " + response.MatchToken);
-            currentMatchToken = response.MatchToken;
-            winProbability = response.WinChance;
-            InitBetAPI();
-        }, "7up7down", APIController.instance.userDetails.game_Id.Split("_")[0], APIController.instance.userDetails.Id, APIController.instance.userDetails.isBlockApiConnection);
+        BalanceDisplay.text = $"{BetsManager.Bets.Degenerate.Balance.ToString("f2")} <size=40>USD";
     }
 
     public IEnumerator RollIt()
     {
-        if (InternetChecking.isOnline)
-        {
             if (BetsManager.Bets.Settings.SoundToggle.isOn) ParentAudioSource.transform.GetChild(1).GetComponent<AudioSource>().Play();
             BetsManager.Bets.BetHistory.Clear();
             BetsManager.Bets.UndoneMoves.Clear();
@@ -155,8 +141,6 @@ public class DiceRolla : MonoBehaviour
             areRolling = false;
             foreach (GameObject range in BetsManager.Bets.BetButtonParents) for (int i = 0; i < range.transform.childCount; i++) range.transform.GetChild(i).GetComponent<Button>().interactable = true;
             BetsManager.Bets.QuickAccessParentObject.transform.GetChild(2).GetComponent<Button>().interactable = true;
-        }
-        else yield return null;
     }
 
     int Matchstate = 2;
@@ -167,7 +151,7 @@ public class DiceRolla : MonoBehaviour
         {
             case 0:
                 Notifications.transform.GetChild(type).gameObject.SetActive(true);
-                Notifications.transform.GetChild(type).GetChild(0).GetComponentInChildren<TMP_Text>().text = $"{value:f2} {APIController.instance.userDetails.currency_type}";
+                Notifications.transform.GetChild(type).GetChild(0).GetComponentInChildren<TMP_Text>().text = $"{value:f2} USD";
                 if (BetsManager.Bets.Settings.SoundToggle.isOn) ParentAudioSource.transform.GetChild(3).GetComponent<AudioSource>().Play();
                 yield return new WaitForSeconds(2f);
                 Notifications.transform.GetChild(type).gameObject.SetActive(false);
@@ -186,7 +170,7 @@ public class DiceRolla : MonoBehaviour
                 break;
             case 3:
                 Notifications.transform.GetChild(2).gameObject.SetActive(true);
-                Notifications.transform.GetChild(2).GetChild(0).GetComponentInChildren<TMP_Text>().text = $"{value:f2} {APIController.instance.userDetails.currency_type}";
+                Notifications.transform.GetChild(2).GetChild(0).GetComponentInChildren<TMP_Text>().text = $"{value:f2} USD";
                 if (BetsManager.Bets.Settings.SoundToggle.isOn) ParentAudioSource.transform.GetChild(4).GetComponent<AudioSource>().Play();
                 yield return new WaitForSeconds(2f);
                 Notifications.transform.GetChild(2).gameObject.SetActive(false);
@@ -255,7 +239,7 @@ public class DiceRolla : MonoBehaviour
 
     public void BetCountdown()
     {
-        if (APIController.instance.userDetails.balance - BetsManager.Bets.Degenerate.BettingPool < 0)
+        if (BetsManager.Bets.Degenerate.Balance - BetsManager.Bets.Degenerate.BettingPool < 0)
         {
             BetsManager.Bets.DisplayInsufficientPopup();
             return;
@@ -268,7 +252,7 @@ public class DiceRolla : MonoBehaviour
             BetsManager.Bets.QuickAccessParentObject.transform.GetChild(2).GetComponent<Button>().interactable = false;
             BetsManager.Bets.QuickAccessParentObject.transform.GetChild(3).GetComponent<Button>().interactable = false;
             BetsManager.Bets.Degenerate.Balance -= BetsManager.Bets.Degenerate.BettingPool;
-            CallCreateMatch(); //Get rid of it
+            //CallCreateMatch(); //Get rid of it
             foreach (int item in BetsManager.Bets.BettingPools)
             {
                 if (item > 0)
@@ -304,24 +288,5 @@ public class DiceRolla : MonoBehaviour
         //TimeDisplay.transform.parent.gameObject.SetActive(false);
         //}
         //}
-    }
-
-    void InitBetAPI() //Get rid of it
-    {
-        TransactionMetaData metaData = new()
-        {
-            Amount = BetsManager.Bets.Degenerate.BettingPool,
-            Info = "Initialize Bet",
-        };
-        if (APIController.instance.userDetails.isBlockApiConnection) BetIndex = APIController.instance.InitlizeBet(BetsManager.Bets.Degenerate.BettingPool, metaData, false);
-        else
-        {
-            BetIndex = APIController.instance.InitBetMultiplayerAPI(MultiplayerIndex++, BetsManager.Bets.Degenerate.BettingPool, metaData, false, null, APIController.instance.userDetails.Id, false, (betID) =>
-            {
-                //Debug.Log("BetIDCheck:" + betID);
-                CurrentBetID = betID;
-            }, "7up7down", APIController.instance.userDetails.game_Id.Split("_")[0], APIController.instance.userDetails.gameId, currentMatchToken);
-            //Debug.Log("BetIndexCheck:" + BetIndex);
-        }
     }
 }

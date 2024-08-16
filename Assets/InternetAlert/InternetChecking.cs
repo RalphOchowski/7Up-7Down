@@ -13,17 +13,17 @@ public class InternetChecking : MonoBehaviour
     public bool isPaused;
     public void Start()
     {
-        APIController.instance.OnInternetStatusChange += GetNetworkStatus;
+        //APIController.instance.OnInternetStatusChange += GetNetworkStatus;
     }
 
     public void GetNetworkStatus(string data)
     {       
-        connectionPanel.SetActive(data != "true");
+        /*connectionPanel.SetActive(data != "true");
         BlurredBG.SetActive(data != "true");
         Debug.Log($"Blurred Background Activation: {BlurredBG.activeSelf} Connection Panel Activation: {connectionPanel.activeSelf}");
         isOnline = data != "false";
         //if(connectionPanel.activeSelf && data == "false") GameController.HowToPlay.SetActive(false);
         //if (settingsPanel.activeSelf && data == "false") settingsPanel.GetComponent<SettingsPanelHandler>().HideSettings();
-        DiceRolla.DiceRoll.OnTabSwitch(data != "false");
+        DiceRolla.DiceRoll.OnTabSwitch(data != "false");*/
     }
 }

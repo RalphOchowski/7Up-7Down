@@ -49,7 +49,7 @@ public class BetsManager : MonoBehaviour
 
     private void Update()
     {
-        PoolDisplay.text = $"{Degenerate.BettingPool.ToString("f2")} <size=34>{APIController.instance.userDetails.currency_type}</size>";
+        PoolDisplay.text = $"{Degenerate.BettingPool.ToString("f2")} <size=34>USD</size>";
     }
 
     public void ResetBets(bool state)
@@ -173,17 +173,17 @@ public class BetsManager : MonoBehaviour
             MatchState = 1;
             StartCoroutine(DiceRolla.DiceRoll.Notification(3, Degenerate.BettingPool));
         }
-        TransactionMetaData metaData = new()
+        /*TransactionMetaData metaData = new()
         {
             Amount = BetsManager.Bets.Degenerate.BettingPool,
             Info = "Winnings" +
             " Bet",
-        };
-        if (APIController.instance.userDetails.isBlockApiConnection) APIController.instance.WinningsBet(DiceRolla.DiceRoll.BetIndex, payout, Degenerate.BettingPool, metaData);
+        };*/
+        /*if (APIController.instance.userDetails.isBlockApiConnection) APIController.instance.WinningsBet(DiceRolla.DiceRoll.BetIndex, payout, Degenerate.BettingPool, metaData);
         else
         {
             APIController.instance.WinningsBetMultiplayerAPI(DiceRolla.DiceRoll.BetIndex, DiceRolla.DiceRoll.CurrentBetID, APIController.instance.userDetails.commission + payout, Degenerate.BettingPool, Degenerate.BettingPool, metaData, (status) => { }, APIController.instance.userDetails.Id, false, true, "7up7down", APIController.instance.userDetails.game_Id.Split("_")[0], APIController.instance.userDetails.gameId, APIController.instance.userDetails.commission, DiceRolla.DiceRoll.currentMatchToken);
-        } //Replace the entire if-else clause with non API statements
+        }*/ //Replace the entire if-else clause with non API statements
         HasRedone.Clear();
         return MatchState;
     }
@@ -192,33 +192,19 @@ public class BetsManager : MonoBehaviour
 
     public void DisplayInsufficientPopup()
     {
-        if (APIController.instance.userDetails.balance < 5)
+        if (Degenerate.Balance < 5)
         {
-            if (APIController.instance.userDetails.isBlockApiConnection)
-            {
-                CloseButtons[0].SetActive(false);
-                InsufficientBrokeBoi.ShowMessageWithAction("Oops, you have spent all of your demo money. Go back to lobby to retain your demo money", null, "Insufficient Balance", "BACK TO LOBBY", AlertType.Low);
-            } 
-            else
-            {
-                CloseButtons[0].SetActive(false);
-                Panel.ShowMessageWithAction("You dont have enough money! Kindly add money to your wallet.", null, null, "Insufficient Balance", "ADD CASH", "BACK TO LOBBY", AlertType.Low);
-            } //Get rid of this condition
+            CloseButtons[0].SetActive(false);
+            InsufficientBrokeBoi.ShowMessageWithAction("Oops, you have spent all of your demo money. Go back to lobby to retain your demo money", null, "Insufficient Balance", "BACK TO LOBBY", AlertType.Low);
+            CloseButtons[0].SetActive(false);
+            Panel.ShowMessageWithAction("You dont have enough money! Kindly add money to your wallet.", null, null, "Insufficient Balance", "ADD CASH", "BACK TO LOBBY", AlertType.Low);
         }
         else
         {
-            if (APIController.instance.userDetails.isBlockApiConnection)
-            {
-                CloseButtons[0].SetActive(true);
-                InsufficientBrokeBoi.ShowMessageWithAction("Oops, you have spent all of your demo money. Go back to lobby to retain your demo money", APIController.CloseWindow, "Insufficient Balance", "BACK TO LOBBY", AlertType.Low);
-                if (!InsufficientBrokeBoi.GetComponentInParent<Transform>().GetChild(0).GetChild(2).gameObject.activeSelf) InsufficientBrokeBoi.GetComponentInParent<Transform>().GetChild(0).GetChild(2).gameObject.SetActive(true);
-            }
-            else
-            {
-                CloseButtons[0].SetActive(true);
-                Panel.ShowMessageWithAction("You dont have enough money! Kindly add money to your wallet.", null, null, "Insufficient Balance", "ADD CASH", "BACK TO LOBBY", AlertType.Low);
-                if (!Panel.GetComponentInParent<Transform>().GetChild(0).GetChild(2).gameObject.activeSelf) Panel.GetComponentInParent<Transform>().GetChild(0).GetChild(2).gameObject.SetActive(true);
-            } //Get rid of this condition
+            CloseButtons[0].SetActive(true);
+            InsufficientBrokeBoi.ShowMessageWithAction("Oops, you have spent all of your demo money. Go back to lobby to retain your demo money", null, "Insufficient Balance", "BACK TO LOBBY", AlertType.Low);
+            if (!InsufficientBrokeBoi.GetComponentInParent<Transform>().GetChild(0).GetChild(2).gameObject.activeSelf) InsufficientBrokeBoi.GetComponentInParent<Transform>().GetChild(0).GetChild(2).gameObject.SetActive(true);
+            //Get rid of this condition
         }
     }
 
@@ -279,7 +265,7 @@ public class BetsManager : MonoBehaviour
                 case 1:
                     for (int item = 0; item < BettingPools.Count; item++)
                     {
-                        if (BettingPools[item] > 0 && APIController.instance.userDetails.balance >= Degenerate.BettingPool + BettingPools[item] && Degenerate.BettingPool + BettingPools[item] <= 100)
+                        if (BettingPools[item] > 0 && Degenerate.Balance >= Degenerate.BettingPool + BettingPools[item] && Degenerate.BettingPool + BettingPools[item] <= 100)
                         {
                             Degenerate.BettingPool += BettingPools[item];
                             BetInstance buffer = new(item + 1, BettingPools[item]);
@@ -287,7 +273,7 @@ public class BetsManager : MonoBehaviour
                             BettingPools[item] += BettingPools[item];
                             CoinActivation(item + 1, BettingPools[item], true);
                         }
-                        else if (BettingPools[item] > 0 && Degenerate.BettingPool + BettingPools[item] > APIController.instance.userDetails.balance)
+                        else if (BettingPools[item] > 0 && Degenerate.BettingPool + BettingPools[item] > Degenerate.Balance)
                         {
                             DisplayInsufficientPopup();
                             break;
@@ -539,7 +525,7 @@ public class BetsManager : MonoBehaviour
                 case 3:
                     int sum = 0;
                     foreach (int item in RedoBettingPools) sum += item;
-                    if (sum > APIController.instance.userDetails.balance) DisplayInsufficientPopup();
+                    if (sum > Degenerate.Balance) DisplayInsufficientPopup();
                     else if (DiceRolla.DiceRoll.isCountdown && RedoBettingPools.Count > 0)
                     {
                         if (!DiceRolla.DiceRoll.StartRolling.interactable) DiceRolla.DiceRoll.StartRolling.interactable = true;
@@ -662,7 +648,7 @@ public class BetsManager : MonoBehaviour
     {
         if ((Degenerate.BettingPool < 100) && ((Degenerate.BettingPool + BetAmount) <= 100))
         {
-            if (!DiceRolla.DiceRoll.StartRolling.interactable && BetAmount <= APIController.instance.userDetails.balance) DiceRolla.DiceRoll.StartRolling.interactable = true;
+            if (!DiceRolla.DiceRoll.StartRolling.interactable && BetAmount <= Degenerate.Balance) DiceRolla.DiceRoll.StartRolling.interactable = true;
             if (DiceRolla.DiceRoll.isCountdown)
             {
                 switch (ButtonID)
@@ -670,7 +656,7 @@ public class BetsManager : MonoBehaviour
                     case 1:
                         if (BettingPools[2] == 0)
                         {
-                            if (APIController.instance.userDetails.balance >= Degenerate.BettingPool + BetAmount)
+                            if (Degenerate.Balance >= Degenerate.BettingPool + BetAmount)
                             {
                                 //Degenerate.Balance -= BetAmount;
                                 BetInstance buffer = new(1, BetAmount);
@@ -687,12 +673,12 @@ public class BetsManager : MonoBehaviour
                                 if (!QuickAccessParentObject.transform.GetChild(3).GetComponent<Button>().interactable) QuickAccessParentObject.transform.GetChild(3).GetComponent<Button>().interactable = true;
                                 if (Settings.SoundToggle.isOn) DiceRolla.DiceRoll.ParentAudioSource.transform.GetChild(2).GetComponent<AudioSource>().Play();
                             }
-                            else if (APIController.instance.userDetails.balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
+                            else if (Degenerate.Balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
                         }
                         else StartCoroutine(DiceRolla.DiceRoll.Notification(1, 0));
                         break;
                     case 2:
-                        if (APIController.instance.userDetails.balance >= Degenerate.BettingPool + BetAmount)
+                        if (Degenerate.Balance >= Degenerate.BettingPool + BetAmount)
                         {
                             BetInstance buffer = new(2, BetAmount);
                             BetHistory.Add(buffer);
@@ -709,12 +695,12 @@ public class BetsManager : MonoBehaviour
                             //RedoBettingPools.Clear();
                             if (Settings.SoundToggle.isOn) DiceRolla.DiceRoll.ParentAudioSource.transform.GetChild(2).GetComponent<AudioSource>().Play();
                         }
-                        else if (APIController.instance.userDetails.balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
+                        else if (Degenerate.Balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
                         break;
                     case 3:
                         if (BettingPools[0] == 0)
                         {
-                            if (APIController.instance.userDetails.balance >= BetAmount)
+                            if (Degenerate.Balance >= BetAmount)
                             {
                                 //Degenerate.Balance -= BetAmount;
                                 BetInstance buffer = new(3, BetAmount);
@@ -735,12 +721,12 @@ public class BetsManager : MonoBehaviour
                                 //RedoBettingPools.Clear();
                                 if (Settings.SoundToggle.isOn) DiceRolla.DiceRoll.ParentAudioSource.transform.GetChild(2).GetComponent<AudioSource>().Play();
                             }
-                            else if (APIController.instance.userDetails.balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
+                            else if (Degenerate.Balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
                         }
                         else StartCoroutine(DiceRolla.DiceRoll.Notification(1, 0));
                         break;
                     case 4:
-                        if (APIController.instance.userDetails.balance >= Degenerate.BettingPool + BetAmount)
+                        if (Degenerate.Balance >= Degenerate.BettingPool + BetAmount)
                         {
                             //Degenerate.Balance -= BetAmount;
                             BetInstance buffer = new(4, BetAmount);
@@ -761,10 +747,10 @@ public class BetsManager : MonoBehaviour
                             //RedoBettingPools.Clear();
                             if (Settings.SoundToggle.isOn) DiceRolla.DiceRoll.ParentAudioSource.transform.GetChild(2).GetComponent<AudioSource>().Play();
                         }
-                        else if (APIController.instance.userDetails.balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
+                        else if (Degenerate.Balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
                         break;
                     case 5:
-                        if (APIController.instance.userDetails.balance >= Degenerate.BettingPool + BetAmount)
+                        if (Degenerate.Balance >= Degenerate.BettingPool + BetAmount)
                         {
                             //Degenerate.Balance -= BetAmount;
                             BetInstance buffer = new(5, BetAmount);
@@ -785,10 +771,10 @@ public class BetsManager : MonoBehaviour
                             //RedoBettingPools.Clear();
                             if (Settings.SoundToggle.isOn) DiceRolla.DiceRoll.ParentAudioSource.transform.GetChild(2).GetComponent<AudioSource>().Play();
                         }
-                        else if (APIController.instance.userDetails.balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
+                        else if (Degenerate.Balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
                         break;
                     case 6:
-                        if (APIController.instance.userDetails.balance >= Degenerate.BettingPool + BetAmount)
+                        if (Degenerate.Balance >= Degenerate.BettingPool + BetAmount)
                         {
                             //Degenerate.Balance -= BetAmount;
                             BetInstance buffer = new(6, BetAmount);
@@ -809,10 +795,10 @@ public class BetsManager : MonoBehaviour
                             //RedoBettingPools.Clear();
                             if (Settings.SoundToggle.isOn) DiceRolla.DiceRoll.ParentAudioSource.transform.GetChild(2).GetComponent<AudioSource>().Play();
                         }
-                        else if (APIController.instance.userDetails.balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
+                        else if (Degenerate.Balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
                         break;
                     case 7:
-                        if (APIController.instance.userDetails.balance >= Degenerate.BettingPool + BetAmount)
+                        if (Degenerate.Balance >= Degenerate.BettingPool + BetAmount)
                         {
                             BetInstance buffer = new(7, BetAmount);
                             BetHistory.Add(buffer);
@@ -832,10 +818,10 @@ public class BetsManager : MonoBehaviour
                             //RedoBettingPools.Clear();
                             if (Settings.SoundToggle.isOn) DiceRolla.DiceRoll.ParentAudioSource.transform.GetChild(2).GetComponent<AudioSource>().Play();
                         }
-                        else if (APIController.instance.userDetails.balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
+                        else if (Degenerate.Balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
                         break;
                     case 8:
-                        if (APIController.instance.userDetails.balance >= Degenerate.BettingPool + BetAmount)
+                        if (Degenerate.Balance >= Degenerate.BettingPool + BetAmount)
                         {
                             //Degenerate.Balance -= BetAmount;
                             BetInstance buffer = new(8, BetAmount);
@@ -856,10 +842,10 @@ public class BetsManager : MonoBehaviour
                             //RedoBettingPools.Clear();
                             if (Settings.SoundToggle.isOn) DiceRolla.DiceRoll.ParentAudioSource.transform.GetChild(2).GetComponent<AudioSource>().Play();
                         }
-                        else if (APIController.instance.userDetails.balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
+                        else if (Degenerate.Balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
                         break;
                     case 9:
-                        if (APIController.instance.userDetails.balance >= Degenerate.BettingPool + BetAmount)
+                        if (Degenerate.Balance >= Degenerate.BettingPool + BetAmount)
                         {
                             //Degenerate.Balance -= BetAmount;
                             BetInstance buffer = new(9, BetAmount);
@@ -880,10 +866,10 @@ public class BetsManager : MonoBehaviour
                             //RedoBettingPools.Clear();
                             if (Settings.SoundToggle.isOn) DiceRolla.DiceRoll.ParentAudioSource.transform.GetChild(2).GetComponent<AudioSource>().Play();
                         }
-                        else if (APIController.instance.userDetails.balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
+                        else if (Degenerate.Balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
                         break;
                     case 10:
-                        if (APIController.instance.userDetails.balance >= Degenerate.BettingPool + BetAmount)
+                        if (Degenerate.Balance >= Degenerate.BettingPool + BetAmount)
                         {
                             //Degenerate.Balance -= BetAmount;
                             BetInstance buffer = new(10, BetAmount);
@@ -901,10 +887,10 @@ public class BetsManager : MonoBehaviour
                             //RedoBettingPools.Clear();
                             if (Settings.SoundToggle.isOn) DiceRolla.DiceRoll.ParentAudioSource.transform.GetChild(2).GetComponent<AudioSource>().Play();
                         }
-                        else if (APIController.instance.userDetails.balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
+                        else if (Degenerate.Balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
                         break;
                     case 11:
-                        if (APIController.instance.userDetails.balance >= Degenerate.BettingPool + BetAmount)
+                        if (Degenerate.Balance >= Degenerate.BettingPool + BetAmount)
                         {
                             //Degenerate.Balance -= BetAmount;
                             BetInstance buffer = new(11, BetAmount);
@@ -922,10 +908,10 @@ public class BetsManager : MonoBehaviour
                             //RedoBettingPools.Clear();
                             if (Settings.SoundToggle.isOn) DiceRolla.DiceRoll.ParentAudioSource.transform.GetChild(2).GetComponent<AudioSource>().Play();
                         }
-                        else if (APIController.instance.userDetails.balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
+                        else if (Degenerate.Balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
                         break;
                     case 12:
-                        if (APIController.instance.userDetails.balance >= Degenerate.BettingPool + BetAmount)
+                        if (Degenerate.Balance >= Degenerate.BettingPool + BetAmount)
                         {
                             //Degenerate.Balance -= BetAmount;
                             BetInstance buffer = new(12, BetAmount);
@@ -943,10 +929,10 @@ public class BetsManager : MonoBehaviour
                             //RedoBettingPools.Clear();
                             if (Settings.SoundToggle.isOn) DiceRolla.DiceRoll.ParentAudioSource.transform.GetChild(2).GetComponent<AudioSource>().Play();
                         }
-                        else if (APIController.instance.userDetails.balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
+                        else if (Degenerate.Balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
                         break;
                     case 13:
-                        if (APIController.instance.userDetails.balance >= Degenerate.BettingPool + BetAmount)
+                        if (Degenerate.Balance >= Degenerate.BettingPool + BetAmount)
                         {
                             //Degenerate.Balance -= BetAmount;
                             BetInstance buffer = new(13, BetAmount);
@@ -964,7 +950,7 @@ public class BetsManager : MonoBehaviour
                             //RedoBettingPools.Clear();
                             if (Settings.SoundToggle.isOn) DiceRolla.DiceRoll.ParentAudioSource.transform.GetChild(2).GetComponent<AudioSource>().Play();
                         }
-                        else if (APIController.instance.userDetails.balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
+                        else if (Degenerate.Balance <= Degenerate.BettingPool + BetAmount) DisplayInsufficientPopup();
                         break;
                 }
                 if (QuickAccessParentObject.transform.GetChild(2).GetComponent<Button>().interactable) QuickAccessParentObject.transform.GetChild(2).GetComponent<Button>().interactable = false;

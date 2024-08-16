@@ -94,13 +94,14 @@ public class SettingsPanelHandler : MonoBehaviour
 
     private void ShowFullScreen()
     {
-        APIController.FullScreen();
+        //APIController.FullScreen();
+        Screen.fullScreen = true;
         HideSettings();
     }
 
     public void OnExitBtnClick()
     {
         HideSettings();
-        APIController.CloseWindow();
+        Application.Quit();
     }
 }
